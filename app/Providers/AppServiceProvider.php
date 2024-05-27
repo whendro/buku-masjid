@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if($this->app->environment('production')) {
+            \URL::forceScheme('https');
+        }
+        
         require_once app_path().'/Helpers/functions.php';
         require_once app_path().'/Helpers/date_time.php';
         Paginator::useBootstrap();
