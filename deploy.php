@@ -29,15 +29,15 @@ add('rsync', [
 
 // Set up a deployer task to copy secrets from directory env to /var/www/nama-laravel-project in server.
 task('deploy:secrets', function () {
-    run('cp $HOME/env/dompet/production/.env {{deploy_path}}/shared');
+    run('cp $HOME/second/masjid.desaklepu.id/.env {{deploy_path}}/shared');
 });
 
 // Hosts
-host('dompetku') // Name of the server
-    ->hostname('178.128.104.220') // Hostname or IP address
+host('whe') // Name of the server
+    ->hostname('10.10.10.105') // Hostname or IP address
     ->stage('production') // Deployment stage (production, staging, etc)
-    ->user('deployer') // SSH user
-    ->set('deploy_path', '/var/www/dompet') // Deploy path
+    ->user('heptaco') // SSH user
+    ->set('deploy_path', '/home/heptaco/second/masjid.desaklepu.id') // Deploy path
     ->set('http_user', 'www-data');
 
 after('deploy:failed', 'deploy:unlock'); // Unlock after failed deploy
