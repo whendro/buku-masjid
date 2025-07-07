@@ -16,7 +16,7 @@
             {{ Form::submit(__('report.view_report'), ['class' => 'btn btn-info mr-1']) }}
             {{ link_to_route('public_reports.finance.detailed', __('report.this_week'), Request::except(['start_date', 'end_date']), ['class' => 'btn btn-secondary mr-1']) }}
         </div>
-        <div class="form-group">
+        <div class="form-group mt-4 mt-sm-0">
             @livewire('prev-week-button', ['routeName' => 'public_reports.finance.detailed', 'buttonClass' => 'btn btn-secondary mr-1'])
             @livewire('next-week-button', ['routeName' => 'public_reports.finance.detailed', 'buttonClass' => 'btn btn-secondary'])
         </div>
@@ -24,9 +24,21 @@
     </div>
 </div>
 
+@php
+    $lastWeekDate = null;
+@endphp
 @foreach($groupedTransactions as $weekNumber => $weekTransactions)
 <div class="card table-responsive">
+    @php
+        $lastWeekDate = $lastWeekDate ?: $lastMonthDate;
+    @endphp
+    <div class="card-header">
+        <h3 class="card-title">{{ __('time.week') }} {{ ++$weekNumber }}</h3>
+    </div>
     @include('public_reports.finance._public_content_detailed')
+    @php
+        $lastWeekDate = Carbon\Carbon::parse($weekTransactions->last()->last()->date);
+    @endphp
 </div>
 @endforeach
 @endsection

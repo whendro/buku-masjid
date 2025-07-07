@@ -14,7 +14,7 @@ class UpdateRequest extends FormRequest
     public function authorize()
     {
         return $this->user()->can('update', $this->route('transaction'))
-        && $this->user()->can('manage-transactions', auth()->activeBook());
+        && $this->user()->can('manage-transactions', $this->route('transaction')->book);
     }
 
     /**
@@ -30,6 +30,8 @@ class UpdateRequest extends FormRequest
             'amount' => 'required|max:60',
             'description' => 'required|max:255',
             'category_id' => 'nullable|exists:categories,id',
+            'partner_id' => ['nullable', 'exists:partners,id'],
+            'bank_account_id' => ['nullable', 'exists:bank_accounts,id'],
         ];
     }
 

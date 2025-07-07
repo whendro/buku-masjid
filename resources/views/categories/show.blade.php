@@ -29,10 +29,10 @@
                 <thead>
                     <tr>
                         <th class="text-center col-md-1">{{ __('app.table_no') }}</th>
-                        <th class="text-center col-md-2">{{ __('app.date') }}</th>
-                        <th class="col-md-7">{{ __('transaction.description') }}</th>
+                        <th class="text-center col-md-1">{{ __('app.date') }}</th>
+                        <th class="col-md-6">{{ __('transaction.description') }}</th>
                         <th class="text-right col-md-2">{{ __('transaction.amount') }}</th>
-                        <th class="text-center">{{ __('app.action') }}</th>
+                        <th class="text-center col-md-2">{{ __('app.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,19 +40,37 @@
                     <tr>
                         <td class="text-center">{{ 1 + $key }}</td>
                         <td class="text-center">{{ $transaction->date }}</td>
-                        <td>{{ $transaction->description }}</td>
+                        <td>
+                            <span class="float-right">
+                                @if ($transaction->partner)
+                                    @php
+                                        $partnerRoute = route('partners.show', [
+                                            $transaction->partner_id,
+                                            'start_date' => $transaction->date,
+                                            'end_date' => $transaction->date,
+                                        ]);
+                                    @endphp
+                                    <a class="badge badge-info" href="{{ $partnerRoute }}">{{ $transaction->partner->name }}</a>
+                                @endif
+                                <span class="badge {{ $transaction->bankAccount->exists ? 'bg-purple' : 'bg-gray'}}">
+                                    {{ $transaction->bankAccount->name }}
+                                </span>
+                            </span>
+                            <div style="max-width: 600px" class="mr-3">{!! $transaction->date_alert !!} {{ $transaction->description }}</div>
+                        </td>
                         <td class="text-right">{{ $transaction->amount_string }}</td>
                         <td class="text-center">
                             @can('update', $transaction)
                                 @can('manage-transactions', auth()->activeBook())
                                     {!! link_to_route(
-                                        'categories.show',
+                                        'transactions.edit',
                                         __('app.edit'),
-                                        [$category->id, 'action' => 'edit', 'id' => $transaction->id] + request(['start_date', 'end_date', 'query', 'book_id']),
+                                        [$transaction, 'reference_page' => 'category', 'category_id' => $category->id, 'start_date' => $startDate, 'end_date' => $endDate] + request(['query']),
                                         ['id' => 'edit-transaction-'.$transaction->id]
-                                    ) !!}
+                                    ) !!} |
                                 @endcan
                             @endcan
+                            {{ link_to_route('transactions.show', __('app.detail'), $transaction) }}
                         </td>
                     </tr>
                     @empty
@@ -81,11 +99,6 @@
         </div>
     </div>
 </div>
-@if(Request::has('action'))
-    @can('manage-transactions', auth()->activeBook())
-        @include('categories.partials.transaction-forms')
-    @endcan
-@endif
 
 @endsection
 
@@ -97,10 +110,6 @@
     {{ Html::script(url('js/plugins/jquery.datetimepicker.js')) }}
 <script>
 (function () {
-    $('#transactionModal').modal({
-        show: true,
-        backdrop: 'static',
-    });
     $('.date-select').datetimepicker({
         timepicker:false,
         format:'Y-m-d',

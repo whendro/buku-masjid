@@ -49,6 +49,26 @@ class LecturingEntryTest extends TestCase
     }
 
     /** @test */
+    public function user_can_duplicate_a_lecturing()
+    {
+        $this->loginAsUser();
+        $lecturing = factory(Lecturing::class)->create(['date' => '2023-04-05']);
+        $this->visitRoute('lecturings.show', $lecturing);
+        $this->seeElement('a', ['id' => 'duplicate_lecturing-'.$lecturing->id]);
+
+        $this->click('duplicate_lecturing-'.$lecturing->id);
+        $this->seeRouteIs('lecturings.create', ['original_lecturing_id' => $lecturing->id]);
+
+        $this->seeElement('input', ['type' => 'text', 'name' => 'date', 'value' => today()->format('Y-m-d')]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'start_time', 'value' => $lecturing->start_time]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'time_text', 'value' => $lecturing->time_text]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'lecturer_name', 'value' => $lecturing->lecturer_name]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'imam_name', 'value' => $lecturing->imam_name]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'muadzin_name', 'value' => $lecturing->muadzin_name]);
+        $this->seeElement('input', ['type' => 'text', 'name' => 'title', 'value' => $lecturing->title]);
+    }
+
+    /** @test */
     public function validate_lecturing_date_is_required()
     {
         $this->loginAsUser();
@@ -56,6 +76,40 @@ class LecturingEntryTest extends TestCase
         // date empty
         $this->post(route('lecturings.store'), $this->getCreateFields(['date' => '']));
         $this->assertSessionHasErrors('date');
+    }
+
+    /** @test */
+    public function validate_lecturing_date_and_start_time_is_unique()
+    {
+        factory(Lecturing::class)->create([
+            'date' => '2023-05-01',
+            'start_time' => '05:50',
+            'time_text' => 'BA\'DA SUBUH',
+        ]);
+        $this->loginAsUser();
+
+        $this->post(route('lecturings.store'), $this->getCreateFields([
+            'date' => '2023-05-01',
+            'start_time' => '05:50',
+            'time_text' => 'BA\'DA SUBUH',
+        ]));
+        $this->assertSessionHasErrors('time_text');
+    }
+
+    /** @test */
+    public function validate_lecturing_date_and_time_text_is_unique()
+    {
+        factory(Lecturing::class)->create([
+            'date' => '2023-05-01',
+            'time_text' => 'BA\'DA SUBUH',
+        ]);
+        $this->loginAsUser();
+
+        $this->post(route('lecturings.store'), $this->getCreateFields([
+            'date' => '2023-05-01',
+            'time_text' => 'BA\'DA SUBUH',
+        ]));
+        $this->assertSessionHasErrors('time_text');
     }
 
     /** @test */

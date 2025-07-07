@@ -40,7 +40,7 @@ class LecturingEditTest extends TestCase
         $this->click('edit-lecturing-'.$lecturing->id);
         $this->seeRouteIs('lecturings.edit', $lecturing);
 
-        $this->submitForm(__('lecturing.update'), $this->getEditFields());
+        $this->submitForm(__('app.save'), $this->getEditFields());
 
         $this->seeRouteIs('lecturings.show', $lecturing);
         $this->seeText(__('lecturing.updated'));
@@ -54,11 +54,54 @@ class LecturingEditTest extends TestCase
     public function validate_lecturing_date_update_is_required()
     {
         $this->loginAsUser();
-        $lecturing = factory(Lecturing::class)->create(['date' => 'Testing 123']);
+        $lecturing = factory(Lecturing::class)->create(['date' => '2023-03-01']);
 
         // date empty
         $this->patch(route('lecturings.update', $lecturing), $this->getEditFields(['date' => '']));
         $this->assertSessionHasErrors('date');
+    }
+
+    /** @test */
+    public function validate_lecturing_date_and_time_text_update_is_unique()
+    {
+        factory(Lecturing::class)->create([
+            'date' => '2023-05-01',
+            'time_text' => 'BA\'DA SUBUH',
+        ]);
+        $lecturing = factory(Lecturing::class)->create([
+            'date' => '2023-03-01',
+            'time_text' => 'BA\'DA ISYA',
+        ]);
+        $this->loginAsUser();
+
+        $this->patch(route('lecturings.update', $lecturing), $this->getEditFields([
+            'date' => '2023-05-01',
+            'time_text' => 'BA\'DA SUBUH',
+        ]));
+        $this->assertSessionHasErrors('time_text');
+    }
+
+    /** @test */
+    public function validate_lecturing_date_and_start_time_update_is_unique()
+    {
+        factory(Lecturing::class)->create([
+            'date' => '2023-05-01',
+            'start_time' => '05:50',
+            'time_text' => 'BA\'DA SUBUH',
+        ]);
+        $lecturing = factory(Lecturing::class)->create([
+            'date' => '2023-03-01',
+            'start_time' => '20:10',
+            'time_text' => 'BA\'DA ISYA',
+        ]);
+        $this->loginAsUser();
+
+        $this->patch(route('lecturings.update', $lecturing), $this->getEditFields([
+            'date' => '2023-05-01',
+            'start_time' => '05:50',
+            'time_text' => 'BA\'DA SUBUH',
+        ]));
+        $this->assertSessionHasErrors('start_time');
     }
 
     /** @test */
@@ -119,7 +162,7 @@ class LecturingEditTest extends TestCase
         $this->seeRouteIs('friday_lecturings.edit', $lecturing);
         $this->seeText(__('lecturing.edit_for_friday'));
 
-        $this->submitForm(__('lecturing.update'), $this->getEditForFridayFields());
+        $this->submitForm(__('app.save'), $this->getEditForFridayFields());
 
         $this->seeRouteIs('friday_lecturings.show', $lecturing);
         $this->seeText(__('lecturing.updated'));

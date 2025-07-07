@@ -68,10 +68,13 @@ class FinanceController extends Controller
         }
 
         if ($request->has('year') && $request->has('month')) {
-            $year = $request->get('year');
+            $year = (int) $request->get('year');
             $month = $request->get('month');
             if ($month == '00') {
                 return Carbon::parse($year.'-01-01');
+            }
+            if (!isset(get_months()[$month])) {
+                $month = Carbon::now()->format('m');
             }
 
             return Carbon::parse($year.'-'.$month.'-01');
@@ -99,7 +102,7 @@ class FinanceController extends Controller
         }
 
         if ($request->has('year') && $request->has('month')) {
-            $year = $request->get('year');
+            $year = (int) $request->get('year');
             $month = $request->get('month');
             if ($month == '00') {
                 if ($year == Carbon::now()->format('Y')) {
@@ -108,11 +111,22 @@ class FinanceController extends Controller
 
                 return Carbon::parse($year.'-12-31');
             }
+            if (!isset(get_months()[$month])) {
+                $month = Carbon::now()->format('m');
+            }
+
+            if ($year.'-'.$month == Carbon::now()->format('Y-m')) {
+                return now();
+            }
 
             return Carbon::parse(Carbon::parse($year.'-'.$month.'-10')->format('Y-m-t'));
         }
 
         $yearMonth = $this->getYearMonth();
+
+        if ($yearMonth == Carbon::now()->format('Y-m')) {
+            return now();
+        }
 
         return Carbon::parse($yearMonth.'-01')->endOfMonth();
     }

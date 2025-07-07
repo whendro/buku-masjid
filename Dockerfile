@@ -1,5 +1,3 @@
-ARG PHP_VERSION='8.1'
-
 # ================
 # Base Stage
 # ================
@@ -18,6 +16,7 @@ ENV APP_DEBUG=false
 USER root:root
 
 # Required Modules
+USER root:root
 RUN apt-get update && \
     # apt-get install -y php${PHP_VERSION}-mysql php${PHP_VERSION}-gd libpng-dev && \
     apt-get clean && \
@@ -40,4 +39,3 @@ RUN php ./artisan key:generate && \
     php ./artisan route:cache && \
     php ./artisan config:cache && \
     php ./artisan storage:link
-

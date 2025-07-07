@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.settings')
 
 @section('title', __('lecturing.detail'))
 
-@section('content')
-<div class="row justify-content-center">
+@section('content_settings')
+<div class="row justify-content-center mt-4">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
@@ -39,6 +39,9 @@
             <div class="card-footer">
                 @can('update', $lecturing)
                     {{ link_to_route('lecturings.edit', __('lecturing.edit'), [$lecturing], ['class' => 'btn btn-warning', 'id' => 'edit-lecturing-'.$lecturing->id]) }}
+                @endcan
+                @can('create', new App\Models\Lecturing)
+                    {{ link_to_route('lecturings.create', __('lecturing.duplicate'), ['original_lecturing_id' => $lecturing->id], ['class' => 'btn btn-success', 'id' => 'duplicate_lecturing-'.$lecturing->id]) }}
                 @endcan
                 {{ link_to_route('lecturings.index', __('lecturing.back_to_index'), [], ['class' => 'btn btn-link']) }}
             </div>

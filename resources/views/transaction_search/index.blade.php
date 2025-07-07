@@ -21,6 +21,7 @@
                     {{ Form::text('start_date', $startDate, ['class' => 'form-control form-control-sm mr-2 mt-4 mt-sm-0 date-select', 'style' => 'width:100px', 'placeholder' => __('time.start_date')]) }}
                     {{ Form::text('end_date', $endDate, ['class' => 'form-control form-control-sm mr-2 mt-4 mt-sm-0 date-select', 'style' => 'width:100px', 'placeholder' => __('time.end_date')]) }}
                     {{ Form::select('category_id', $categories, request('category_id'), ['placeholder' => __('category.all'), 'class' => 'form-control form-control-sm mr-2 mt-4 mt-sm-0', ]) }}
+                    {{ Form::select('bank_account_id', $bankAccounts, request('bank_account_id'), ['placeholder' => '-- '.__('transaction.origin_destination').' --', 'class' => 'form-control form-control-sm mr-2']) }}
                     <div class="form-group mt-4 mt-sm-0">
                         {{ Form::submit(__('app.search'), ['class' => 'btn btn-primary btn-sm mr-2']) }}
                         {{ link_to_route('transaction_search.index', __('app.reset'), [], ['class' => 'btn btn-secondary btn-sm']) }}
@@ -45,8 +46,20 @@
                             <td class="text-center">{{ 1 + $key }}</td>
                             <td>{{ $transaction->date }} ({{ $transaction->day_name }})</td>
                             <td>
-                                {{ $transaction->description }}
                                 <div class="float-right">
+                                    @if ($transaction->partner)
+                                        @php
+                                            $partnerRoute = route('partners.show', [
+                                                $transaction->partner_id,
+                                                'start_date' => $startDate,
+                                                'end_date' => $endDate,
+                                            ]);
+                                        @endphp
+                                        <a class="badge badge-info" href="{{ $partnerRoute }}">{{ $transaction->partner->name }}</a>
+                                    @endif
+                                    <span class="badge {{ $transaction->bankAccount->exists ? 'bg-purple' : 'bg-gray'}}">
+                                        {{ $transaction->bankAccount->name }}
+                                    </span>
                                     @if ($transaction->category)
                                         @php
                                             $categoryRoute = route('categories.show', [
@@ -58,14 +71,16 @@
                                         <a href="{{ $categoryRoute }}">{!! $transaction->category->name_label !!}</a>
                                     @endif
                                 </div>
+                                <div style="max-width: 600px" class="mr-3">{!! $transaction->date_alert !!} {{ $transaction->description }}</div>
                             </td>
                             <td class="text-right">{{ $transaction->amount_string }}</td>
                             <td class="text-center text-nowrap">
-                                {{ link_to_route('transactions.index', __('app.show'), [
+                                {{ link_to_route('transactions.show', __('app.show'), [
+                                    $transaction,
                                     'query' => $searchQuery,
-                                    'date' => $transaction->date_only,
-                                    'month' => $transaction->month,
-                                    'year' => $transaction->year,
+                                    'start_date' => $startDate,
+                                    'end_date' => $endDate,
+                                    'reference_page' => 'transaction_search',
                                 ], ['class' => 'btn btn-secondary btn-sm']) }}
                             </td>
                         </tr>

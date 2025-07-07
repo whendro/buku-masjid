@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\BankAccount;
 use App\Models\Book;
+use App\Transaction;
 use App\User;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -31,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'books' => Book::class,
             'users' => User::class,
+            'bank_accounts' => BankAccount::class,
+            'transactions' => Transaction::class,
         ]);
 
         // Ref: https://dzone.com/articles/how-to-use-laravel-macro-with-example

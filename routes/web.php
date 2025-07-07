@@ -12,6 +12,9 @@
 */
 
 Route::view('/', 'guest.welcome');
+Route::view('/kontak', 'guest.contact')->name('public.contact');
+Route::get('/programs', 'PublicBookController@index')->name('public.books.index');
+Route::get('/programs/{book}', 'PublicBookController@show')->name('public.books.show');
 
 Auth::routes(['register' => false, 'reset' => false]);
 
@@ -22,13 +25,15 @@ Route::group(['prefix' => 'laporan-kas', 'as' => 'public_reports.'], function ()
     Route::get('/rincian', 'Reports\PublicFinanceController@detailed')->name('finance.detailed');
 });
 
-Route::group(['prefix' => 'jadwal', 'as' => 'public_schedules.'], function () {
-    Route::get('/', 'PublicScheduleController@today')->name('index');
-    Route::get('/hari_ini', 'PublicScheduleController@today')->name('today');
-    Route::get('/besok', 'PublicScheduleController@tomorrow')->name('tomorrow');
-    Route::get('/pekan_ini', 'PublicScheduleController@thisWeek')->name('this_week');
-    Route::get('/pekan_depan', 'PublicScheduleController@nextWeek')->name('next_week');
-});
+if (config('features.lecturings.is_active')) {
+    Route::group(['prefix' => 'jadwal', 'as' => 'public_schedules.'], function () {
+        Route::get('/', 'PublicScheduleController@today')->name('index');
+        Route::get('/hari_ini', 'PublicScheduleController@today')->name('today');
+        Route::get('/besok', 'PublicScheduleController@tomorrow')->name('tomorrow');
+        Route::get('/pekan_ini', 'PublicScheduleController@thisWeek')->name('this_week');
+        Route::get('/pekan_depan', 'PublicScheduleController@nextWeek')->name('next_week');
+    });
+}
 
 // Change Password Routes
 Route::get('change-password', 'Auth\ChangePasswordController@show');
@@ -49,7 +54,11 @@ Route::group(['middleware' => 'auth'], function () {
      */
     Route::get('transaction_search', 'TransactionSearchController@index')->name('transaction_search.index');
     Route::get('transactions/export-csv', 'Transactions\ExportController@csv')->name('transactions.exports.csv');
+    Route::get('transactions/{transaction}/print_receipt', 'Transactions\ReceiptPrintController@show')->name('transactions.print_receipt');
+    Route::get('transactions/{transaction}/print_spending_request', 'Transactions\SpendingRequestPrintController@show')
+        ->name('transactions.print_spending_request');
     Route::resource('transactions', 'TransactionsController');
+    Route::apiResource('transactions.files', 'Transactions\FileController');
 
     /*
      * Categories Routes
@@ -57,11 +66,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('categories/{category}/export-csv', 'Transactions\ExportController@byCategory')->name('transactions.exports.by_category');
     Route::resource('categories', 'CategoriesController');
 
+    Route::get('system_info', 'SystemInfoController@index')->name('system_info.index');
+
     /*
      * Report Routes
      */
     Route::group(['prefix' => 'report'], function () {
-        Route::get('/', 'Reports\InternalFinanceController@summary')->name('reports.index');
+        Route::get('/', 'Reports\InternalFinanceController@dashboard')->name('reports.index');
+
+        Route::get('/finance/dashboard', 'Reports\InternalFinanceController@dashboard')->name('reports.finance.dashboard');
+        Route::get('/finance/dashboard_pdf', 'Reports\InternalFinanceController@dashboardPdf')->name('reports.finance.dashboard_pdf');
 
         Route::get('/finance/summary', 'Reports\InternalFinanceController@summary')->name('reports.finance.summary');
         Route::get('/finance/summary_pdf', 'Reports\InternalFinanceController@summaryPdf')->name('reports.finance.summary_pdf');
@@ -93,16 +107,37 @@ Route::group(['middleware' => 'auth'], function () {
     Route::apiResource('bank_accounts.balances', 'BankAccounts\BalanceController');
 
     /*
+     * Partner Routes
+     */
+    Route::get('partners/search', 'PartnerController@search')->name('partners.search');
+    Route::resource('partners', 'PartnerController');
+    Route::patch('partners/{partner}/change_levels', 'PartnerController@changeLevels')->name('partners.change_levels');
+
+    /*
+     * Donor Routes
+     */
+    if (config('features.donors.is_active')) {
+        Route::get('donors/search', 'DonorController@search')->name('donors.search');
+        Route::resource('donors', 'DonorController');
+        Route::get('donor_transactions', 'DonorTransactionController@create')->name('donor_transactions.create');
+        Route::post('donor_transactions', 'DonorTransactionController@store')->name('donor_transactions.store');
+    }
+
+    /*
      * Lecturings Routes
      */
-    Route::resource('friday_lecturings', App\Http\Controllers\FridayLecturingController::class)
-        ->parameters(['friday_lecturings' => 'lecturing'])
-        ->only(['create', 'store', 'show', 'edit', 'update']);
-    Route::resource('lecturings', App\Http\Controllers\LecturingController::class);
+    if (config('features.lecturings.is_active')) {
+        Route::resource('friday_lecturings', App\Http\Controllers\FridayLecturingController::class)
+            ->parameters(['friday_lecturings' => 'lecturing'])
+            ->only(['create', 'store', 'show', 'edit', 'update']);
+        Route::resource('lecturings', App\Http\Controllers\LecturingController::class);
+    }
 
     Route::get('masjid_profile', [App\Http\Controllers\MasjidProfileController::class, 'show'])->name('masjid_profile.show');
     Route::get('masjid_profile/edit', [App\Http\Controllers\MasjidProfileController::class, 'edit'])->name('masjid_profile.edit');
     Route::patch('masjid_profile', [App\Http\Controllers\MasjidProfileController::class, 'update'])->name('masjid_profile.update');
+    Route::patch('masjid_profile/coordinates/update', [App\Http\Controllers\MasjidProfileController::class, 'coordinatesUpdate'])
+        ->name('masjid_profile.coordinates.update');
 
     /*
      * Backup Restore Database Routes

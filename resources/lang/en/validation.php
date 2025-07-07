@@ -106,6 +106,28 @@ return [
         ],
     ],
 
+    'lecturing' => [
+        'time_text' => [
+            'unique' => 'Duplicated lecturing schedule :time_text on the selected date.',
+        ],
+        'start_time' => [
+            'unique' => 'Duplicated lecturing schedule :start_time on the selected date.',
+        ],
+    ],
+
+    'donor' => [
+        'notes' => [
+            'max' => 'Donor notes are too long, max :max characters.',
+        ],
+    ],
+
+    'partner' => [
+        'phone' => [
+            'between' => 'Phone/WA Number between :min and :max digits.',
+            'starts_with' => 'Phone/WA Number should be number and may start with +.',
+        ],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Attributes
