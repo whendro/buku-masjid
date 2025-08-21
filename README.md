@@ -24,7 +24,6 @@ Kami ingin berterima kasih kepada sponsor yang mendukung development Buku Masjid
 1. [Pondok Teknologi](https://pondokteknologi.com)
 1. [Pondok IT](https://pondokit.com)
 1. [Mushaira](https://mushaira.id)
-1. [Pyramidsoft Indonesia Group](https://ptpsig.com)
 1. [LKSA Al Ma'un Center](https://lynk.id/almauncenter)
 1. [STIMI Banjarmasin](https://stimi-bjm.ac.id)
 1. [Jetorbit](https://www.jetorbit.com)
@@ -186,3 +185,7 @@ Untuk pengumuman dan update:
 ## Lisensi
 
 Proyek Buku Masjid merupakan perangkat lunak open-source yang dilisensikan di bawah [Lisensi MIT](LICENSE).
+
+### Credits
+
+Proyek ini menggunakan bunyi bip dari [Pixabay](https://pixabay.com/sound-effects/race-start-beeps-125125) oleh [transcendedlifting](https://pixabay.com/users/transcendedlifting-30596364) (Pixabay License)
